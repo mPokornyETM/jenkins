@@ -87,6 +87,7 @@ public class LabelAtom extends Label implements Saveable {
     protected transient volatile List<Action> transientActions = new Vector<>();
 
     private String description;
+    private String color;
 
     public LabelAtom(@NonNull String name) {
         super(name);
@@ -141,8 +142,30 @@ public class LabelAtom extends Label implements Saveable {
         return description;
     }
 
+    @SuppressWarnings("unused") // used by jelly view
     public void setDescription(String description) throws IOException {
         this.description = description;
+        save();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * Returns label color as string. In case of empty string (or null)
+     * it means there are no color assigned.
+     */
+    @SuppressWarnings("unused") // used by jelly view
+    public String getColor() {
+        return color;
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * Set and save color string.
+     * @todo It will be fine to check if the color is valid or not.
+     */
+    @SuppressWarnings("unused") // used by jelly view
+    public void setColor(String color) throws IOException {
+        this.color = color;
         save();
     }
 
@@ -233,6 +256,7 @@ public class LabelAtom extends Label implements Saveable {
         properties.rebuild(req, req.getSubmittedForm(), getApplicablePropertyDescriptors());
 
         this.description = req.getSubmittedForm().getString("description");
+        this.color = req.getSubmittedForm().getString("color");
 
         updateTransientActions();
         save();

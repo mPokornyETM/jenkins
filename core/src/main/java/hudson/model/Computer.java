@@ -487,6 +487,13 @@ public /*transient*/ abstract class Computer extends Actionable implements Acces
     }
 
     /**
+     * Returns how long is the computer connected in human readable String
+     */
+    public final String getConnectDurationTimeSpanString() {
+        return Util.getTimeSpanString(System.currentTimeMillis() - this.getConnectTime());
+    }
+
+    /**
      * Disconnect this computer.
      *
      * If this is the built-in node, no-op. This method may return immediately
