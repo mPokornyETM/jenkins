@@ -1,0 +1,10 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:s="/lib/form">
+  <j:set var="data" value="${m.data(c)}"/>
+  <j:set var="value" value="${data.getValue()}"/>
+  <j:set var="detail" value="${data.getValueDetail()}"/>
+  
+  <td data="${value != null ? value : '%unknownValue'}" tooltip="${detail != null ? detail : '%unknownValue'}">
+    ${value}
+  </td>
+</j:jelly>

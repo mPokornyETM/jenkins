@@ -1,0 +1,53 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  
+  ${it.getClass().getName()}Path
+  <f:entry title="${%columnName}" field="columnName">
+    <f:textbox/>
+  </f:entry>
+  <f:entry title="${%columnTooltip}" field="columnTooltip">
+    <f:textbox/>
+  </f:entry>
+  <f:entry title="${%propertyValueGroovy}" field="propertyValueGroovy">
+    <f:textbox/>
+  </f:entry>
+  <f:entry title="${%propertyRangeGroovy}" field="propertyRangeGroovy">
+    <f:textbox/>
+  </f:entry>
+  <f:entry title="${%propertyDetailGroovy}" field="propertyDetailGroovy">
+    <f:textbox value="${propertyDetailGroovy}"/>
+  </f:entry>
+
+<!--  <p>
+    ${%description}
+  </p>
+  <p>
+    ${%description2}
+  </p>
+
+
+  <f:entry title="${%propertyValueGroovy}" field="propertyValueGroovy">
+          
+    <textarea id="script" name="script" class="script">${propertyValueGroovy}</textarea>
+    <st:adjunct includes="org.kohsuke.stapler.codemirror.mode.groovy.groovy"/>
+    <st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default"/>
+  
+  </f:entry>
+
+  <f:entry title="${%propertyRangeGroovy}" field="propertyRangeGroovy">
+          
+    <textarea id="script" name="script" class="script">${propertyRangeGroovy}</textarea>
+    <st:adjunct includes="org.kohsuke.stapler.codemirror.mode.groovy.groovy"/>
+    <st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default"/>
+  
+  </f:entry>
+
+  <f:entry title="${%propertyDetailGroovy}" field="propertyDetailGroovy">
+          
+    <textarea id="script" name="script" class="script">${propertyDetailGroovy}</textarea>
+    <st:adjunct includes="org.kohsuke.stapler.codemirror.mode.groovy.groovy"/>
+    <st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default"/>
+  
+  </f:entry> -->
+
+</j:jelly>
