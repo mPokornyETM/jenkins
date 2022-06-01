@@ -48,6 +48,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -488,21 +489,40 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
             }
 
             // if we have any new monitors, let's add them
+            List<NodeMonitor> preferred = new ArrayList<>();
             for (Descriptor<NodeMonitor> d : NodeMonitor.all()) {
                 if (loadedMonitors.get(d) == null) {
                     NodeMonitor i = createDefaultInstance(d, false);
-                    if (i != null && !i.isIgnored() && i.getColumnCaption() != null ) {
+                    if (i != null && !i.isIgnored() && i.getColumnCaption() != null) {
+
                         int preferredPosition = i.getColumn().getPreferredPosition();
-                        LOGGER.log(Level.INFO, "Add new monitor " + i.getColumn().getCaption() + " at " + preferredPosition);
+
+                        if (sanitized.stream().filter(o -> o.getColumnCaption().equals(i.getColumnCaption())).findFirst().isPresent()) {
+                            LOGGER.log(Level.FINE, "The monitor ?" + i.getColumnCaption() + " exists, therefore ignore it");
+                            continue;
+                        }
+
+                        LOGGER.log(Level.FINE, "Add new monitor " + i.getColumnCaption() + " at " + preferredPosition);
+
                         if (preferredPosition < 0)
                             sanitized.add(i);
                         else
-                            sanitized.add(preferredPosition, i);
+                            preferred.add(i);
                     }
                 }
             }
-            // loadedMonitors.replaceBy(sanitized);
-            monitors.replaceBy(sanitized);
+
+            // sort monitors by preferred position
+            Collections.sort(preferred, new Comparator<NodeMonitor>() {
+                @Override
+                public int compare(NodeMonitor m1, NodeMonitor m2) {
+                    return m1.getColumn().getPreferredPosition() - m2.getColumn().getPreferredPosition();
+                }
+            });
+
+            monitors.replaceBy(preferred);
+            // and append monitors without preferred position on the end
+            monitors.addAll(sanitized);
         } catch (Throwable x) {
             LOGGER.log(Level.WARNING, "Failed to instantiate NodeMonitors", x);
         }

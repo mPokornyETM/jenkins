@@ -1,0 +1,88 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:s="/lib/form">
+  <style type="text/css">
+  .node-overview > p {
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    vertical-align: middle !important;
+    color: #57606a !important;
+    margin: 0px;
+  }
+  .node-overview > a {
+    font-weight: 600;
+  }
+  .node-overview > li {
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    vertical-align: middle !important;
+    color: #57606a !important;
+    margin: 0px;
+    display:inline;
+  }
+  .node-labels {
+    padding-top:10px;
+    margin: 0 1.25rem 0 0 !important;
+    font-size: 0.75rem;
+  }
+  .node-description {
+    border-bottom: 1px solid #57606a;
+  }
+  </style>
+  <j:set var="labelsInfo" value="${m.data(c)}"/>
+  <td data="${c.name}" class="node-overview">
+    <!-- link to node -->
+    <a href="${rootURL}/${c.url}" class="model-link jenkins-table__link">${c.displayName}</a>
+
+    <!-- node assigned labels -->
+    <j:if test="${labelsInfo.getAllowedLabels().size() gt 1}">
+
+      <div class="node-labels d-flex mt-1 text-small color-fg-muted">
+        <j:forEach var="entry" items="${labelsInfo.getAllowedLabels()}">
+          <st:include it="${entry}" page="../Label/Badge/index.jelly"/>
+        </j:forEach>
+
+        <j:if test="${labelsInfo.getAllLabels().size() gt labelsInfo.getAllowedLabels().size()}">
+          <j:if test="${c.hasPermission(c.EXTENDED_READ)}">
+            <div class="jenkins-table__cell__button-wrapper">
+              <a href="${rootURL}/${c.url}" class="jenkins-table__button badge rounded-pill jenkins-table__badge">
+                and ${labelsInfo.getAllLabels().size() - labelsInfo.getAllowedLabels().size()} more
+              </a>
+            </div>
+          </j:if>
+        </j:if>
+
+      </div>
+    </j:if>
+
+    <!-- node description -->
+    <j:if test="${from.showDescription &amp;&amp; !empty(c.description)}">
+      <div class="node-description pane desc indent-multiline">
+        <j:out value="${app.markupFormatter.translate(c.description)}"/>
+      </div>
+    </j:if>
+
+    <div class="node-overview">
+    <!-- connected since info -->
+    <j:if test="${from.showConnectSince &amp;&amp; c.getConnectTime() gt 0}">
+      <li>${%connectedAgo(c.getConnectDurationTimeSpanString())}</li>
+    </j:if>
+
+    <!-- connecting state -->
+    <j:if test="${from.showConnectingState &amp;&amp; c.isConnecting()}">
+      <li>${%connecting}</li>
+    </j:if>
+
+    <!-- offline cause -->     
+    <j:if test="${!c.isOnline()}">
+      <j:if test="${from.showLaunchMode &amp;&amp; !c.isLaunchSupported()}">
+        <li>${%launchIsNotSupported}</li>
+      </j:if>
+      <j:if test="${from.showOfflineCause &amp;&amp; c.offlineCause!=null }">
+        <st:include it="${c.offlineCause}" page="cause.jelly" />
+      </j:if>
+    </j:if>
+    </div>
+  </td>
+</j:jelly>

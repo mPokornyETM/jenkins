@@ -36,8 +36,8 @@ import hudson.model.Node;
 import hudson.tasks.Publisher;
 import hudson.util.DescriptorList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+// import java.util.logging.Level;
+// import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -137,44 +137,8 @@ public abstract class NodeMonitor implements ExtensionPoint, Describable<NodeMon
         this.ignored = ignored;
     }
 
-    public Column getColumn() {
-        return new Column(this.getClass(), this.getDescriptor());
-    }
-
-    // @Restricted(DoNotUse.class)
-    // @ExportedBean(defaultVisibility = 0)
-    public static class Column {
-        private static final Logger LOGGER = Logger.getLogger(ComputerSet.class.getName());
-
-        private final int preferredColumnPosition = -1;
-        private final Class<?> clazz;
-        private AbstractNodeMonitorDescriptor<?> descriptor;
-
-        private Column(Class<?> clazz, AbstractNodeMonitorDescriptor<?> descriptor) {
-            this.clazz = clazz;
-            this.descriptor = descriptor;
-        }
-
-        public String getCaption() {
-            return this.descriptor.getDisplayName();
-        }
-
-        public int getPreferredPosition() {
-            return preferredColumnPosition;
-        }
-
-        /// @todo get table header : sort, align ..
-        public String getHeader() {
-            return getHeader("columnHeader.jelly");
-        }
-        public String getHeader(String page) {
-            LOGGER.log(Level.INFO, "getHeader: " + page);
-            if (clazz.getClassLoader().getResource(page) != null)
-                return page;
-            
-            return "";
-            // return this.descriptor.getViewPage(this.clazz, "columnHeader.jelly");
-        }
+    public NodeMonitorColumn getColumn() {
+        return new NodeMonitorColumn();
     }
 
     /**

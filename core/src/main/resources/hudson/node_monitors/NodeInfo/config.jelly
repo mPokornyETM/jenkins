@@ -1,0 +1,28 @@
+<!--
+The MIT License
+-->
+
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <f:entry title="${%enabledLabelsCount}" field="maxLabelCount">
+    <f:number default="5"/>
+  </f:entry>
+  <f:entry title="${%showDynamicLabels}" field="showDynamicLabels">
+    <f:checkbox/>
+  </f:entry>
+  <f:entry title="${%showDescription}" field="showDescription">
+    <f:checkbox/>
+  </f:entry>
+  <f:entry title="${%showConnectSince}" field="showConnectSince">
+    <f:checkbox/>
+  </f:entry>
+  <f:entry title="${%showLaunchMode}" field="showLaunchMode">
+    <f:checkbox/>
+  </f:entry>
+  <f:entry title="${%showOfflineCause}" field="showOfflineCause">
+    <f:checkbox/>
+  </f:entry>
+  <f:entry title="${%showConnectingState}" field="showConnectingState">
+    <f:checkbox/>
+  </f:entry>
+</j:jelly>

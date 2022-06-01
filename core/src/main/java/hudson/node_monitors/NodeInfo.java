@@ -21,13 +21,13 @@ import org.kohsuke.stapler.export.ExportedBean;
  */
 public class NodeInfo extends NodeMonitor
 {
-
+  // per default is everything false, so it will has the same look like before
   private boolean showDynamicLabels = false;
-  private int maxLabelCount = 5;
-  private boolean showDescription = true;
+  private int maxLabelCount = 0;
+  private boolean showDescription = false;
   private boolean showConnectSince = false;
   private boolean showLaunchMode = false;
-  private boolean showOfflineCause = true;
+  private boolean showOfflineCause = false;
   private boolean showConnectingState = false;
 
   public NodeInfo() {}
@@ -51,17 +51,6 @@ public class NodeInfo extends NodeMonitor
   public boolean isIgnored() {
     return false; // this is node column caption, Can not be ignored
   }
-
-  // @Override
-  // public int getPreferredColumnPosition() {
-  //   return 0;
-  // }
-
-  // @Override
-  // public String getColumnCaption()
-  // {
-  //   return getDescriptor().getDisplayName();
-  // }
 
   public boolean getShowDynamicLabels()
   {
@@ -113,6 +102,29 @@ public class NodeInfo extends NodeMonitor
     return new Data(c.getName(), data, maxLabelCount);
   }
 
+  @Override
+  public NodeMonitorNodeInfoColumn getColumn() {
+    return new NodeMonitorNodeInfoColumn();
+  }
+
+  // @Restricted(DoNotUse.class)
+  // @ExportedBean(defaultVisibility = 0)
+  public static class NodeMonitorNodeInfoColumn extends NodeMonitorColumn {
+
+    public NodeMonitorNodeInfoColumn() {
+    }
+
+    @Override
+    public int getPreferredPosition() {
+      return 2;
+    }
+
+    @Override
+    public boolean isImplemented() {
+      return true;
+    }
+  }
+
   @Restricted(DoNotUse.class)
   @ExportedBean(defaultVisibility = 0)
   public static class Data {
@@ -144,7 +156,7 @@ public class NodeInfo extends NodeMonitor
       }
       return Collections.unmodifiableSet(allowedLabels);
     }
-    
+
     public Set<LabelAtom> getAllLabels()
     {
       return Collections.unmodifiableSet(labels);
@@ -166,4 +178,5 @@ public class NodeInfo extends NodeMonitor
       return null;
     }
   }
+
 }

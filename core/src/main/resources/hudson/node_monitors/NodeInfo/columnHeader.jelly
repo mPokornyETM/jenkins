@@ -1,0 +1,8 @@
+<!--
+The MIT License
+-->
+
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <th initialSortDir="down" tooltip="${m.descriptor.timestampString}">${m.descriptor.displayName}</th>
+</j:jelly>

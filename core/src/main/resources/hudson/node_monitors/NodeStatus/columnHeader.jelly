@@ -1,0 +1,8 @@
+<!--
+The MIT License
+-->
+
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <th tooltip="${%column.tooltip}">${%column.name}</th>
+</j:jelly>

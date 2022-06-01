@@ -1,0 +1,15 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:s="/lib/form">
+  <j:set var="tt" value="N/A"/>
+  <j:if test="${c.offlineCause != null}">
+    <j:set var="tt" value="${c.offlineCause}"/>
+  </j:if>
+  <j:if test="${c.getConnectTime() gt 0}">
+    <j:set var="tt" value="${%connectedAgo(c.getConnectDurationTimeSpanString())}"/>
+  </j:if>
+  <td data="${c.icon}" class="jenkins-table__cell--tight jenkins-table__icon" tooltip="${tt}">
+    <div class="jenkins-table__cell__button-wrapper">
+      <l:icon src="${c.iconClassName}" alt="${c.iconAltText}"/>
+    </div>
+  </td>
+</j:jelly>
