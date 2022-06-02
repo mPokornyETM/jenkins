@@ -473,7 +473,6 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
             // load persisted monitors
             XmlFile xf = getConfigFile();
             if (xf.exists()) {
-                LOGGER.log(Level.INFO, "Load monitors from config:" + xf.getFile().toPath());
                 DescribableList<NodeMonitor, Descriptor<NodeMonitor>> persisted =
                         (DescribableList<NodeMonitor, Descriptor<NodeMonitor>>) xf.read();
 
@@ -489,6 +488,8 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
             }
 
             // if we have any new monitors, let's add them
+            // @todo not happy with them, because when admin removes the monitors and reboots the jenkins
+            // this will show it again. But I think this can be done by JCaC
             List<NodeMonitor> preferred = new ArrayList<>();
             for (Descriptor<NodeMonitor> d : NodeMonitor.all()) {
                 if (loadedMonitors.get(d) == null) {
@@ -498,11 +499,8 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
                         int preferredPosition = i.getColumn().getPreferredPosition();
 
                         if (sanitized.stream().filter(o -> o.getColumnCaption().equals(i.getColumnCaption())).findFirst().isPresent()) {
-                            LOGGER.log(Level.FINE, "The monitor ?" + i.getColumnCaption() + " exists, therefore ignore it");
                             continue;
                         }
-
-                        LOGGER.log(Level.FINE, "Add new monitor " + i.getColumnCaption() + " at " + preferredPosition);
 
                         if (preferredPosition < 0)
                             sanitized.add(i);

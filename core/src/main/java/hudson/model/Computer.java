@@ -488,6 +488,7 @@ public /*transient*/ abstract class Computer extends Actionable implements Acces
         return connectTime;
     }
 
+    //-------------------------------------------------------------------------
     /**
      * Returns how long is the computer connected in human readable String
      */

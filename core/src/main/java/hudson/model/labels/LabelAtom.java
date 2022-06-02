@@ -67,6 +67,8 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.kohsuke.stapler.verb.POST;
 
+
+//-----------------------------------------------------------------------------
 /**
  * Atomic single token label, like "foo" or "bar".
  *
@@ -86,13 +88,17 @@ public class LabelAtom extends Label implements Saveable {
     @CopyOnWrite
     protected transient volatile List<Action> transientActions = new Vector<>();
 
+    // label description
     private String description;
+    // label color (used in badges)
     private String color;
 
+    //-------------------------------------------------------------------------
     public LabelAtom(@NonNull String name) {
         super(name);
     }
 
+    //-------------------------------------------------------------------------
     /**
      * If the label contains 'unsafe' chars, escape them.
      */
@@ -101,9 +107,11 @@ public class LabelAtom extends Label implements Saveable {
         return escape(name);
     }
 
+    //-------------------------------------------------------------------------
     @Override
     public boolean isAtom() { return true; }
 
+    //-------------------------------------------------------------------------
     /**
      * {@inheritDoc}
      *
@@ -125,6 +133,7 @@ public class LabelAtom extends Label implements Saveable {
 
     // TODO implement addAction, addOrReplaceAction, removeAction, removeActions, replaceActions
 
+    //-------------------------------------------------------------------------
     protected void updateTransientActions() {
         Vector<Action> ta = new Vector<>();
 
@@ -134,7 +143,9 @@ public class LabelAtom extends Label implements Saveable {
         transientActions = ta;
     }
 
+    //-------------------------------------------------------------------------
     /**
+     * Returns label description.
      * @since 1.580
      */
     @Override
@@ -142,6 +153,10 @@ public class LabelAtom extends Label implements Saveable {
         return description;
     }
 
+    //-------------------------------------------------------------------------
+    /**
+     * Set and save description
+     */
     @SuppressWarnings("unused") // used by jelly view
     public void setDescription(String description) throws IOException {
         this.description = description;
@@ -161,9 +176,11 @@ public class LabelAtom extends Label implements Saveable {
     //-------------------------------------------------------------------------
     /**
      * Set and save color string.
-     * @todo It will be fine to check if the color is valid or not.
+     * The function does not checks, if the color is valid or not. 
+     * That means, when you use the function in external things, you must validate
+     * color-string by your self (use some color-picker tool).
      */
-    @SuppressWarnings("unused") // used by jelly view
+    @SuppressWarnings("unused") // for external usage
     public void setColor(String color) throws IOException {
         this.color = color;
         save();
@@ -240,6 +257,7 @@ public class LabelAtom extends Label implements Saveable {
         return LabelAtomProperty.all();
     }
 
+    //-------------------------------------------------------------------------
     /**
      * Accepts the update to the node configuration.
      */
@@ -256,6 +274,8 @@ public class LabelAtom extends Label implements Saveable {
         properties.rebuild(req, req.getSubmittedForm(), getApplicablePropertyDescriptors());
 
         this.description = req.getSubmittedForm().getString("description");
+
+        // the color is given by color-picker, therefore should be valid and we skip the validation here
         this.color = req.getSubmittedForm().getString("color");
 
         updateTransientActions();

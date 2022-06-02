@@ -36,8 +36,6 @@ import hudson.model.Node;
 import hudson.tasks.Publisher;
 import hudson.util.DescriptorList;
 import java.util.List;
-// import java.util.logging.Level;
-// import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -74,8 +72,7 @@ public abstract class NodeMonitor implements ExtensionPoint, Describable<NodeMon
      * Returns the name of the column to be added to {@link ComputerSet} index.jelly.
      *
      * @return
-     *      null to not render a column. The convention is to use capitalization like "Foo Bar Zot".t
-     * @todo use getColumn() ...
+     *      null to not render a column. The convention is to use capitalization like "Foo Bar Zot".
      */
     @Exported
     public @CheckForNull String getColumnCaption() {
@@ -137,6 +134,10 @@ public abstract class NodeMonitor implements ExtensionPoint, Describable<NodeMon
         this.ignored = ignored;
     }
 
+    //-------------------------------------------------------------------------
+    /**
+     * Returns column information like header, preferred position ...
+     */
     public NodeMonitorColumn getColumn() {
         return new NodeMonitorColumn();
     }
