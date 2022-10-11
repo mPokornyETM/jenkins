@@ -36,9 +36,12 @@ THE SOFTWARE.
       <j:set var="descriptor" value="${it.descriptor}" />
 
       <f:form method="post" action="configSubmit" name="config">
-        <f:descriptorList title="${%Preventive Node Monitoring}"
-                          descriptors="${it.nodeMonitorDescriptors}"
-                          instances="${it.nonIgnoredMonitors}" />
+
+      <f:section title="${%Preventive Node Monitoring}">
+        <f:block>
+          <f:repeatableHeteroProperty field="monitors" hasHeader="true" addCaption="${%Add column}"/>
+        </f:block>
+      </f:section>
 
         <l:hasAdministerOrManage>
           <f:bottomButtonBar>

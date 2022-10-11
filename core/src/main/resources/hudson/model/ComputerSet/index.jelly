@@ -30,12 +30,21 @@ THE SOFTWARE.
 <l:layout title="${%Nodes}">
   <st:include page="sidepanel.jelly" />
   <l:main-panel>
-    <j:set var="monitors" value="${it._monitors}"/>
-    <j:set var="tableWidth" value="${3}"/>
 
     <div class="jenkins-app-bar">
       <div class="jenkins-app-bar__content">
         <h1>${%Manage nodes and clouds}</h1>
+      </div>
+      <div class="jenkins-search">
+        <input
+          class="jenkins-search__input"
+          type="search"
+          id="filter-box"
+          value="${request.getParameter('filter')}"
+          placeholder="${%Search}"/>
+        <div class="jenkins-search__icon">
+          <l:icon src="symbol-search"/>
+        </div>
       </div>
       <l:hasAdministerOrManage>
         <div class="jenkins-app-bar__controls">
@@ -46,15 +55,22 @@ THE SOFTWARE.
       </l:hasAdministerOrManage>
     </div>
 
+    <j:set var="monitors" value="${it._monitors}"/>
     <table id="computers" class="jenkins-table sortable">
       <thead>
         <tr>
-          <th class="jenkins-table__cell--tight">S</th>
-          <th initialSortDir="down">${%Name}</th>
           <j:forEach var="m" items="${monitors}">
             <j:if test="${m.columnCaption!=null}">
-              <j:set var="tableWidth" value="${tableWidth+1}"/>
-              <th align="right" tooltip="${m.descriptor.timestampString}">${m.columnCaption}</th>
+
+              <j:choose>
+                <j:when test="${m.getColumn().isImplemented()}">
+                  <st:include page="${m.getClass().getName().replace('.', '/').replace('hudson/', '../../')}/columnHeader.jelly" from="${m}" />
+                </j:when>
+                <j:otherwise>
+                  <!-- compatibility with oter plugins -->
+                  <th align="right" tooltip="${m.descriptor.timestampString}">${m.getColumnCaption()}</th>
+                </j:otherwise>
+              </j:choose>
             </j:if>
           </j:forEach>
           <th class="jenkins-table__cell--tight" data-sort-disable="true" />
@@ -63,17 +79,7 @@ THE SOFTWARE.
       <tbody>
 
       <j:forEach var="c" items="${it._all}">
-        <tr id="node_${c.name}">
-          <td data="${c.icon}" class="jenkins-table__cell--tight jenkins-table__icon">
-            <div class="jenkins-table__cell__button-wrapper">
-              <l:icon src="${c.iconClassName}" alt="${c.iconAltText}"/>
-            </div>
-          </td>
-
-          <td>
-            <a href="${rootURL}/${c.url}" class="jenkins-table__link model-link inside">${c.displayName}</a>
-          </td>
-
+        <tr id="node_${c.name}">   
           <j:forEach var="m" items="${monitors}">
             <j:if test="${m.columnCaption!=null}">
               <j:set var="data" value="${m.data(c)}"/>
@@ -95,11 +101,11 @@ THE SOFTWARE.
 
       <!-- let clouds contribute fragments here -->
       <j:forEach var="cloud" items="${app.clouds}">
+      <!-- todo Q: how shall this works -->
         <st:include it="${cloud}" page="computerSet.jelly" optional="true" />
       </j:forEach>
 
       <tr class="sortbottom">
-        <th />
         <th>${%Data obtained}</th>
         <j:forEach var="m" items="${monitors}">
           <j:if test="${m.columnCaption!=null}">

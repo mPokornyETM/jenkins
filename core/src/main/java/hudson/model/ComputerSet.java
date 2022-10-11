@@ -34,6 +34,7 @@ import hudson.Util;
 import hudson.XmlFile;
 import hudson.init.Initializer;
 import hudson.model.Descriptor.FormException;
+import hudson.model.labels.LabelAtom;
 import hudson.model.listeners.SaveableListener;
 import hudson.node_monitors.NodeMonitor;
 import hudson.slaves.NodeDescriptor;
@@ -46,9 +47,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,6 +101,25 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
         return Messages.ComputerSet_DisplayName();
     }
 
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unused") // used by jelly view
+    @Exported
+    public Set<LabelAtom> getAllLabels() {
+        Set<LabelAtom> labels = new HashSet<>();
+        for (Computer c : get_all()) {
+            // assigned labels
+            Set<LabelAtom> assignedNodeLabels = Label.parse(c.getNode().getLabelString());
+            // + dynamic labels (some plugins use it)
+            assignedNodeLabels.addAll(c.getNode().getDynamicLabels());
+            for (LabelAtom label : assignedNodeLabels) {
+                if (!labels.contains(label))
+                    labels.add(label);
+            }
+        }
+        return Collections.unmodifiableSet(labels);
+    }
+
+    //-------------------------------------------------------------------------
     /**
      * @deprecated as of 1.301
      *      Use {@link #getMonitors()}.
@@ -132,7 +156,9 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
 
     /**
      * Returns a subset pf {@link #getMonitors()} that are {@linkplain NodeMonitor#isIgnored() not ignored}.
+     * @deprecated I hope so
      */
+    @Deprecated
     public static Map<Descriptor<NodeMonitor>, NodeMonitor> getNonIgnoredMonitors() {
         Map<Descriptor<NodeMonitor>, NodeMonitor> r = new HashMap<>();
         for (NodeMonitor m : monitors) {
@@ -351,7 +377,7 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
         BulkChange bc = new BulkChange(MONITORS_OWNER);
         try {
             Jenkins.get().checkPermission(Jenkins.MANAGE);
-            monitors.rebuild(req, req.getSubmittedForm(), getNodeMonitorDescriptors());
+            monitors.rebuildHetero(req, req.getSubmittedForm(), getNodeMonitorDescriptors(), "monitors");
 
             // add in the rest of instances are ignored instances
             for (Descriptor<NodeMonitor> d : NodeMonitor.all())
@@ -394,14 +420,14 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
          * Auto-completion for the "copy from" field in the new job page.
          */
         public AutoCompletionCandidates doAutoCompleteCopyNewItemFrom(@QueryParameter final String value) {
-            final AutoCompletionCandidates r = new AutoCompletionCandidates();
+            final AutoCompletionCandidates candidates = new AutoCompletionCandidates();
 
             for (Node n : Jenkins.get().getNodes()) {
                 if (n.getNodeName().startsWith(value))
-                    r.add(n.getNodeName());
+                    candidates.add(n.getNodeName());
             }
 
-            return r;
+            return candidates;
         }
     }
 
@@ -440,15 +466,16 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
 
     static {
         try {
-            DescribableList<NodeMonitor, Descriptor<NodeMonitor>> r
+            DescribableList<NodeMonitor, Descriptor<NodeMonitor>> loadedMonitors
                     = new DescribableList<>(Saveable.NOOP);
+            List<NodeMonitor> sanitized = new ArrayList<>();
 
             // load persisted monitors
             XmlFile xf = getConfigFile();
             if (xf.exists()) {
                 DescribableList<NodeMonitor, Descriptor<NodeMonitor>> persisted =
                         (DescribableList<NodeMonitor, Descriptor<NodeMonitor>>) xf.read();
-                List<NodeMonitor> sanitized = new ArrayList<>();
+
                 for (NodeMonitor nm : persisted) {
                     try {
                         nm.getDescriptor();
@@ -457,17 +484,43 @@ public final class ComputerSet extends AbstractModelObject implements Describabl
                         // the descriptor didn't load? see JENKINS-15869
                     }
                 }
-                r.replaceBy(sanitized);
+
             }
 
             // if we have any new monitors, let's add them
-            for (Descriptor<NodeMonitor> d : NodeMonitor.all())
-                if (r.get(d) == null) {
+            // @todo not happy with them, because when admin removes the monitors and reboots the jenkins
+            // this will show it again. But I think this can be done by JCaC
+            List<NodeMonitor> preferred = new ArrayList<>();
+            for (Descriptor<NodeMonitor> d : NodeMonitor.all()) {
+                if (loadedMonitors.get(d) == null) {
                     NodeMonitor i = createDefaultInstance(d, false);
-                    if (i != null)
-                        r.add(i);
+                    if (i != null && !i.isIgnored() && i.getColumnCaption() != null) {
+
+                        int preferredPosition = i.getColumn().getPreferredPosition();
+
+                        if (sanitized.stream().filter(o -> o.getColumnCaption().equals(i.getColumnCaption())).findFirst().isPresent()) {
+                            continue;
+                        }
+
+                        if (preferredPosition < 0)
+                            sanitized.add(i);
+                        else
+                            preferred.add(i);
+                    }
                 }
-            monitors.replaceBy(r.toList());
+            }
+
+            // sort monitors by preferred position
+            Collections.sort(preferred, new Comparator<NodeMonitor>() {
+                @Override
+                public int compare(NodeMonitor m1, NodeMonitor m2) {
+                    return m1.getColumn().getPreferredPosition() - m2.getColumn().getPreferredPosition();
+                }
+            });
+
+            monitors.replaceBy(preferred);
+            // and append monitors without preferred position on the end
+            monitors.addAll(sanitized);
         } catch (Throwable x) {
             LOGGER.log(Level.WARNING, "Failed to instantiate NodeMonitors", x);
         }

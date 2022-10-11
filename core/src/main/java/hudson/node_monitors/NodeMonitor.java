@@ -134,6 +134,14 @@ public abstract class NodeMonitor implements ExtensionPoint, Describable<NodeMon
         this.ignored = ignored;
     }
 
+    //-------------------------------------------------------------------------
+    /**
+     * Returns column information like header, preferred position ...
+     */
+    public NodeMonitorColumn getColumn() {
+        return new NodeMonitorColumn();
+    }
+
     /**
      * All registered {@link NodeMonitor}s.
      * @deprecated as of 1.286.
